@@ -25,12 +25,34 @@ struct Joueurs {
 
 
 /**
+ * @brief Le joueur abandonne la manche.
+ * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ */
+void abandonManche(Joueurs &joueursManche);
+
+
+/**
+ * @brief Le joueur demande au précédent le mot auquel il pensait.
+ * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ */
+void reponseJoueurPrecedent(Joueurs &joueursManche, const char *lettresJouees);
+
+
+/**
+ * @brief Le joueur joue une lettre. On vérifie si elle appartient au dico.
+ * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param lettresJouees -> la liste des lettres déjà jouées
+ */
+bool lettreJoueeHumain(Joueurs &joueursManche, char *lettresJouees, char coupJoue);
+
+
+/**
  * @brief Teste si le joueur à qui on a demandé le mot auquel il pensait gagne la manche.
  * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  * @param lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
  * @return
  */
-bool humainPrecedentGagne(const Joueurs &joueursManche, const char *lettresJouees);
+void reponseHumainPrecedent(Joueurs &joueursManche, const char *lettresJouees);
 
 
 /**
@@ -38,7 +60,7 @@ bool humainPrecedentGagne(const Joueurs &joueursManche, const char *lettresJouee
  * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  * @param lettresJouees -> la liste des lettres déjà jouées
  */
-void reponseRobotPrecedent(const Joueurs &joueursManche, const char *lettresJouees);
+void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees);
 
 
 /**

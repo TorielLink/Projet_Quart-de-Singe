@@ -26,7 +26,7 @@ ifstream ouvertureDico() {
 
 /**
  * @brief Teste si le mot entré appartient au dictionnaire.
- * @param motCherche -> mot entré par le joueur
+ * @param[in] motCherche -> mot entré par le joueur
  * @return 0 -> le mot n'appartient pas ; 1 -> il appartient ; 2 -> le dictionnaire ne s'est pas ouvert
  */
 bool appartientDico(const char motCherche[]) {
@@ -51,7 +51,7 @@ bool appartientDico(const char motCherche[]) {
 
 /**
  * @brief Donne le prochain coup d'un joueur robot.
- * @param lettresJouees -> la liste des lettres données par les joueurs précédents
+ * @param[in] lettresJouees -> la liste des lettres données par les joueurs précédents
  * @return coupJoue -> le caractère joué par le robot
  */
 char jeuRobot(const char lettresJouees[]) {
@@ -99,10 +99,71 @@ char jeuRobot(const char lettresJouees[]) {
 
 
 /**
+ * @brief Renseigne la nature du joueur actuel.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres données par les joueurs précédents
+ * @return coupJoue -> le coup joué par le joueur actuel
+ */
+char jeuJoueurActuel(Joueurs &joueursManche, const char lettresJouees[]) {
+    char coupJoue;
+
+    if (joueursManche.joueurActuel > joueursManche.nbJoueurs) joueursManche.joueurActuel = 1;
+    // le joueur après le dernier est le premier
+    cout << joueursManche.joueurActuel << (char) toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1])
+         << ", ("<< lettresJouees << ") > ";
+    if (toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1]) == 'H') { // Joueur humain
+        cin >> coupJoue;
+        cin.ignore(INT_MAX, '\n');
+    }
+    else if (toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1]) == 'R') { // Joueur robot
+        coupJoue = jeuRobot(lettresJouees);
+        cout << coupJoue << endl;
+    }
+    else { // Joueur alien
+        cerr << "joueur invalide. veuillez réitérer une partie" << endl;
+        exit(1);
+    }
+
+    return coupJoue;
+}
+
+
+/**
+ * @brief Le joueur abandonne la manche.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ */
+void abandonManche(Joueurs &joueursManche) {
+    joueursManche.scoresJoueurs[joueursManche.joueurActuel - 1] += 0.25;
+    joueursManche.joueurPerdant = joueursManche.joueurActuel;
+    cout << "le joueur " <<  joueursManche.joueurActuel
+         << (char) toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1])
+         << " abandonne la manche et prend un quart de singe" << endl;
+}
+
+
+/**
+ * @brief Le joueur demande au précédent le mot auquel il pensait.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
+ */
+void reponseJoueurPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
+    joueursManche.joueurPrecedent = joueursManche.joueurActuel - 1;
+    if (joueursManche.joueurPrecedent == 0) joueursManche.joueurPrecedent = joueursManche.nbJoueurs;
+    cout << joueursManche.joueurPrecedent
+         << (char) toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1]) << ", saisir le mot > ";
+
+    if (toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1]) == 'H')
+         reponseHumainPrecedent(joueursManche, lettresJouees);
+    else
+         reponseRobotPrecedent(joueursManche, lettresJouees);
+    joueursManche.scoresJoueurs[joueursManche.joueurPerdant - 1] += 0.25;
+}
+
+
+/**
  * @brief Teste si le joueur à qui on a demandé le mot auquel il pensait gagne la manche.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
- * @param lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
- * @return
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
  */
 void reponseHumainPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
     char motSaisi[MAX_MOT];
@@ -142,8 +203,8 @@ void reponseHumainPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
 
 /**
  * @brief Affiche le mot auquel "pensait" le robot
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
- * @param lettresJouees -> la liste des lettres déjà jouées
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées
  */
 void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
     ifstream dico = ouvertureDico();
@@ -168,8 +229,58 @@ void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
 
 
 /**
+ * @brief Le joueur joue une lettre. On vérifie si elle appartient au dico.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées
+ * @param[in] coupJoue -> le coup joué par le joueur actuel
+ */
+bool lettreJoueeHumain(Joueurs &joueursManche, char *lettresJouees, const char coupJoue) {
+    bool lettreBonne = true;
+
+   if (toupper(coupJoue) >= 65 && toupper(coupJoue) <= 90) { //la lettre est non-accentuée
+          lettresJouees[strlen(lettresJouees)] = (char) toupper(coupJoue);
+          if (strlen(lettresJouees) > 2) { // Mot testé à partir de trois lettres
+              if (appartientDico(lettresJouees)) {
+                cout << "le mot " << lettresJouees << " existe, le joueur " << joueursManche.joueurActuel
+                     << (char) toupper(joueursManche.joueurs[joueursManche.joueurActuel-1])
+                     << " prend un quart de singe" << endl;
+                joueursManche.scoresJoueurs[joueursManche.joueurActuel - 1] += 0.25;
+                joueursManche.joueurPerdant = joueursManche.joueurActuel;
+                lettreBonne = false;
+              }
+          }
+   }
+   else {
+      cout << "veuillez entrer une lettre non-accentuée" << endl;
+           joueursManche.joueurActuel--;
+   }
+
+ return lettreBonne;
+}
+
+
+/**
+ * @brief Vérifie si la lettre entrée est correcte.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées
+ * @param[in] coupJoue -> le coup joué par le joueur actuel
+ * @return lettreBonne -> le booléen qui vérifie si la lettre est bonne
+ */
+bool lettreJoueeJoueurActuel(Joueurs &joueursManche, char *lettresJouees, const char coupJoue) {
+    bool lettreBonne = true;
+
+    if (toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1]) == 'H')  // Par un humain
+        lettreBonne = lettreJoueeHumain(joueursManche, lettresJouees, coupJoue);
+    else { // Par un robot
+        lettresJouees[strlen(lettresJouees)] = coupJoue;
+    }
+    return lettreBonne;
+}
+
+
+/**
  * @brief Joue une manche.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  */
 void manche(Joueurs &joueursManche) {
     char coupJoue;
@@ -177,68 +288,19 @@ void manche(Joueurs &joueursManche) {
     bool mancheFinie = false;
 
     while (!mancheFinie) {
-        if (joueursManche.joueurActuel > joueursManche.nbJoueurs) joueursManche.joueurActuel = 1;
-        // le joueur après le dernier est le premier
-        cout << joueursManche.joueurActuel << (char) toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1])
-            << ", ("<< lettresJouees << ") > ";
-        if (toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1]) == 'H') { // Joueur humain
-            cin >> coupJoue;
-            cin.ignore(INT_MAX, '\n');
-        }
-        else if (toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1]) == 'R') { // Joueur robot
-            coupJoue = jeuRobot(lettresJouees);
-            cout << coupJoue << endl;
-
-        }
-        else { // Joueur alien
-            cerr << "joueur invalide. veuillez réitérer une partie" << endl;
-            exit(1);
-        }
+            coupJoue = jeuJoueurActuel(joueursManche, lettresJouees);
         // Coups possibles
         if (coupJoue == '!') { // Abandon de la manche
-            joueursManche.scoresJoueurs[joueursManche.joueurActuel - 1] += 0.25;
-            joueursManche.joueurPerdant = joueursManche.joueurActuel;
-            cout << "le joueur " <<  joueursManche.joueurActuel
-            << (char) toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1])
-            << " abandonne la manche et prend un quart de singe" << endl;
+            abandonManche(joueursManche);
             mancheFinie = true;
         }
         else if (coupJoue == '?') { // Demande le mot du joueur précédent
-            joueursManche.joueurPrecedent = joueursManche.joueurActuel - 1;
-            if (joueursManche.joueurPrecedent == 0) joueursManche.joueurPrecedent = joueursManche.nbJoueurs;
-            cout << joueursManche.joueurPrecedent
-                 << (char) toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1])
-                 << ", saisir le mot > ";
-            if (toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1]) == 'H')
-                reponseHumainPrecedent(joueursManche, lettresJouees);
-            else
-                reponseRobotPrecedent(joueursManche, lettresJouees);
-            joueursManche.scoresJoueurs[joueursManche.joueurPerdant - 1] += 0.25;
+            reponseJoueurPrecedent(joueursManche, lettresJouees);
             mancheFinie = true;
         }
-        else { // Lettre jouée → Ajout d'une lettre à celles déjà jouées
-            if (toupper(joueursManche.joueurs[joueursManche.joueurActuel - 1]) == 'H') { // Par un humain
-                if (toupper(coupJoue) >= 65 && toupper(coupJoue) <= 90) { //la lettre est non-accentuée
-                    lettresJouees[strlen(lettresJouees)] = (char) toupper(coupJoue);
-                    if (strlen(lettresJouees) > 2) { // Mot testé à partir de trois lettres
-                        if (appartientDico(lettresJouees)) {
-                            cout << "le mot " << lettresJouees << " existe, le joueur " << joueursManche.joueurActuel
-                                 << (char) toupper(joueursManche.joueurs[joueursManche.joueurActuel-1])
-                                 << " prend un quart de singe" << endl;
-                            joueursManche.scoresJoueurs[joueursManche.joueurActuel - 1] += 0.25;
-                            joueursManche.joueurPerdant = joueursManche.joueurActuel;
-                            mancheFinie = true;
-                        }
-                    }
-                }
-                else {
-                    cout << "veuillez entrer une lettre non-accentuée" << endl;
-                    joueursManche.joueurActuel--;
-                }
-            }
-            else { // Par un robot
-                lettresJouees[strlen(lettresJouees)] = coupJoue;
-            }
+        else { // Lettre jouée → Ajout d'une lettre à celles déjà jouées		
+           if (!lettreJoueeJoueurActuel(joueursManche, lettresJouees, coupJoue))
+               mancheFinie = true;
         }
         joueursManche.joueurActuel++;
     }
@@ -247,7 +309,7 @@ void manche(Joueurs &joueursManche) {
 
 /**
  * @brief Joue une partie.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  */
 void partie(Joueurs &joueursManche) {
     joueursManche.scoresJoueurs = new float[joueursManche.nbJoueurs];
