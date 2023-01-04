@@ -32,47 +32,47 @@ void abandonManche(Joueurs &joueursManche);
 
 
 /**
- * @brief Le joueur demande au précédent le mot auquel il pensait.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @brief Le joueur abandonne la manche.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  */
 void reponseJoueurPrecedent(Joueurs &joueursManche, const char *lettresJouees);
 
 
 /**
- * @brief Le joueur joue une lettre. On vérifie si elle appartient au dico.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
- * @param lettresJouees -> la liste des lettres déjà jouées
+ * @brief Vérifie si la lettre jouée par le joueur appartient au dictionnaire.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées
+ * @param[in] coupJoue -> le coup joué par le joueur actuel
  */
 bool lettreJoueeHumain(Joueurs &joueursManche, char *lettresJouees, char coupJoue);
 
 
 /**
- * @brief Teste si le joueur à qui on a demandé le mot auquel il pensait gagne la manche.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
- * @param lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
- * @return
+ * @brief Le joueur à qui on a demandé le mot auquel il pensait gagne ou non la manche.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
  */
 void reponseHumainPrecedent(Joueurs &joueursManche, const char *lettresJouees);
 
 
 /**
  * @brief Affiche le mot auquel "pensait" le robot
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
- * @param lettresJouees -> la liste des lettres déjà jouées
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in] lettresJouees -> la liste des lettres déjà jouées
  */
 void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees);
 
 
 /**
  * @brief Joue une manche.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  */
 void manche(Joueurs &joueursManche);
 
 
 /**
- * @brief Joue une partie.
- * @param joueursManche -> la structure contenant les joueurs, leur nombre et leur score
+ * @brief Joue une partie entière.
+ * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  */
 void partie(Joueurs &joueursManche);
 

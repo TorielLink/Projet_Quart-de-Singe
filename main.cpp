@@ -1,3 +1,12 @@
+/**
+ * @file main.cpp
+ * SAÉ S1.02 : Le quart de singe
+ * @authors PROUX Clothilde, TASSIN Nicolas
+ * @version finale - 04/01/2023
+ * @brief Jouer une partie de Quart de Singe.
+ * Comparaison d'approches algorithmiques -- BUT Paris - Rives de Seine
+*/
+
 #include <iostream>
 #include <fstream> // pour ifstream
 #include <iomanip> // pour setw
@@ -19,7 +28,6 @@ ifstream ouvertureDico() {
         cerr << "Le dictionnaire n'a pu etre ouvert" << endl;
         exit(2);
     }
-
     return dico;
 }
 
@@ -54,7 +62,7 @@ bool appartientDico(const char motCherche[]) {
  * @param[in] lettresJouees -> la liste des lettres données par les joueurs précédents
  * @return coupJoue -> le caractère joué par le robot
  */
-char jeuRobot(const char lettresJouees[]) {
+char jeuRobot(const char *lettresJouees) {
     ifstream dico = ouvertureDico();
     char coupJoue;
     char motLu[MAX_MOT];
@@ -63,13 +71,14 @@ char jeuRobot(const char lettresJouees[]) {
 
     dico >> setw(MAX_MOT) >> motLu;
     if (strlen(lettresJouees) == 0) { // Le robot joue en premier
-        coupJoue = (char) (rand() % 26 + 65); // Sort une lettre aléatoire
+        coupJoue = (char) (rand() % 26 + 65); // Il sort une lettre aléatoire
     }
     else {
         while (dico) {
             if (strncmp(lettresJouees, motLu, strlen(lettresJouees)) == 0
             // Si les premières lettres de mot lu correspondent aux lettres jouées
             && (strncmp(motLu, debutMotInterdit, strlen(debutMotInterdit)) != 0 || strlen(debutMotInterdit) == 0)) {
+                // Et que ça ne commence pas par les lettres interdites ou qu'il n'y en a pas
                 if (strlen(motLu) == strlen(lettresJouees) + 1) {
                     // Pour ne pas donner une lettre qui terminerait un mot
                     strcpy(debutMotInterdit, motLu);
@@ -93,7 +102,6 @@ char jeuRobot(const char lettresJouees[]) {
             coupJoue = motTrouve[strlen(lettresJouees)];
         dico.close();
     }
-
     return coupJoue;
 }
 
@@ -104,7 +112,7 @@ char jeuRobot(const char lettresJouees[]) {
  * @param[in] lettresJouees -> la liste des lettres données par les joueurs précédents
  * @return coupJoue -> le coup joué par le joueur actuel
  */
-char jeuJoueurActuel(Joueurs &joueursManche, const char lettresJouees[]) {
+char jeuJoueurActuel(Joueurs &joueursManche, const char *lettresJouees) {
     char coupJoue;
 
     if (joueursManche.joueurActuel > joueursManche.nbJoueurs) joueursManche.joueurActuel = 1;
@@ -123,7 +131,6 @@ char jeuJoueurActuel(Joueurs &joueursManche, const char lettresJouees[]) {
         cerr << "joueur invalide. veuillez réitérer une partie" << endl;
         exit(1);
     }
-
     return coupJoue;
 }
 
@@ -149,19 +156,20 @@ void abandonManche(Joueurs &joueursManche) {
 void reponseJoueurPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
     joueursManche.joueurPrecedent = joueursManche.joueurActuel - 1;
     if (joueursManche.joueurPrecedent == 0) joueursManche.joueurPrecedent = joueursManche.nbJoueurs;
+    // Le premier joueur demande au dernier
     cout << joueursManche.joueurPrecedent
          << (char) toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1]) << ", saisir le mot > ";
 
-    if (toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1]) == 'H')
+    if (toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1]) == 'H') // Jouer Humain
          reponseHumainPrecedent(joueursManche, lettresJouees);
-    else
+    else // Joueur Robot
          reponseRobotPrecedent(joueursManche, lettresJouees);
     joueursManche.scoresJoueurs[joueursManche.joueurPerdant - 1] += 0.25;
 }
 
 
 /**
- * @brief Teste si le joueur à qui on a demandé le mot auquel il pensait gagne la manche.
+ * @brief Le joueur à qui on a demandé le mot auquel il pensait gagne ou non la manche.
  * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  * @param[in] lettresJouees -> la liste des lettres déjà jouées par les joueurs précédents
  */
@@ -175,6 +183,7 @@ void reponseHumainPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
         motSaisi[i] = (char) toupper(motSaisi[i]);
     }
     if (strncmp(motSaisi, lettresJouees, strlen(lettresJouees)) != 0) {
+        // Si ça ne commence pas par les lettres déjà jouées
         cout << "le mot " << motSaisi << " ne commence pas par les lettres attendues, le joueur "
              << joueursManche.joueurPrecedent << (char) toupper(joueursManche.joueurs[joueursManche.joueurPrecedent - 1])
              << " prend un quart de singe" << endl;
@@ -214,6 +223,7 @@ void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
     dico >> setw(MAX_MOT) >> motLu;
     while (dico) {
         if (strncmp(lettresJouees, motLu, strlen(lettresJouees)) == 0) {
+            // Recherche un mot qui commence par les lettres jouées
             strcpy(motTrouve,motLu);
             cout << motTrouve << endl;
             cout << "le mot " << motTrouve << " existe, le joueur " << joueursManche.joueurActuel
@@ -229,7 +239,7 @@ void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
 
 
 /**
- * @brief Le joueur joue une lettre. On vérifie si elle appartient au dico.
+ * @brief Vérifie si la lettre jouée par le joueur appartient au dictionnaire.
  * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  * @param[in] lettresJouees -> la liste des lettres déjà jouées
  * @param[in] coupJoue -> le coup joué par le joueur actuel
@@ -237,7 +247,7 @@ void reponseRobotPrecedent(Joueurs &joueursManche, const char *lettresJouees) {
 bool lettreJoueeHumain(Joueurs &joueursManche, char *lettresJouees, const char coupJoue) {
     bool lettreBonne = true;
 
-   if (toupper(coupJoue) >= 65 && toupper(coupJoue) <= 90) { //la lettre est non-accentuée
+   if (toupper(coupJoue) >= 65 && toupper(coupJoue) <= 90) { // La lettre est non-accentuée
           lettresJouees[strlen(lettresJouees)] = (char) toupper(coupJoue);
           if (strlen(lettresJouees) > 2) { // Mot testé à partir de trois lettres
               if (appartientDico(lettresJouees)) {
@@ -254,7 +264,6 @@ bool lettreJoueeHumain(Joueurs &joueursManche, char *lettresJouees, const char c
       cout << "veuillez entrer une lettre non-accentuée" << endl;
            joueursManche.joueurActuel--;
    }
-
  return lettreBonne;
 }
 
@@ -288,7 +297,8 @@ void manche(Joueurs &joueursManche) {
     bool mancheFinie = false;
 
     while (!mancheFinie) {
-            coupJoue = jeuJoueurActuel(joueursManche, lettresJouees);
+        coupJoue = jeuJoueurActuel(joueursManche, lettresJouees);
+
         // Coups possibles
         if (coupJoue == '!') { // Abandon de la manche
             abandonManche(joueursManche);
@@ -308,13 +318,14 @@ void manche(Joueurs &joueursManche) {
 
 
 /**
- * @brief Joue une partie.
+ * @brief Joue une partie entière.
  * @param[in,out] joueursManche -> la structure contenant les joueurs, leur nombre et leur score
  */
 void partie(Joueurs &joueursManche) {
     joueursManche.scoresJoueurs = new float[joueursManche.nbJoueurs];
     joueursManche.joueurActuel = 1;
     for (int j = 0; j < joueursManche.nbJoueurs; ++j) joueursManche.scoresJoueurs[j] = 0.;
+    // Initialise les scores à zéro
 
     do {
         manche(joueursManche);
@@ -340,7 +351,7 @@ void partie(Joueurs &joueursManche) {
 int main(int argc, const char* argv[]) {
     Joueurs joueursManche{};
 
-    // paramètre sur la ligne de commande
+    // Paramètre sur la ligne de commande
     if (argc >= 2) {
         if (strlen(argv[1]) > 1) {
             joueursManche.nbJoueurs = (int) strlen(argv[1]);
@@ -353,6 +364,5 @@ int main(int argc, const char* argv[]) {
     }
     else
         cout << "Il n'y a pas de parametre" << endl;
-
     return 0;
 }
