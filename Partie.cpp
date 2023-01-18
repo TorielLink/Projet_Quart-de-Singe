@@ -1,16 +1,16 @@
 /**
  * @file main.cpp
  * SAÉ S1.02 : Le quart de singe
- * @authors PROUX Clothilde, TASSIN Nicolas
+ * @authors PROUX Clothilde
  * @version finale - 04/01/2023
  * @brief Jouer une partie de Quart de Singe.
  * Comparaison d'approches algorithmiques -- BUT Paris - Rives de Seine
 */
 
 #include <iostream>
-#include <fstream> // pour ifstream
 #include <iomanip> // pour setw
 #include <cstdlib> // pour rand
+#include "Partie.h" // Fonctions de la partie
 
 using namespace std;
 const int MAX_MOT = 26;

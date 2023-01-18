@@ -5,7 +5,7 @@
 /**
  * @file Partie.h
  * SAÉ S1.02 : Le quart de singe
- * @authors PROUX Clothilde, TASSIN Nicolas
+ * @authors PROUX Clothilde
  * @version 1 - 30/12/2022
  * @brief Jouer une partie de Quart de Singe.
  * Comparaison d'approches algorithmiques -- BUT Paris - Rives de Seine
@@ -16,7 +16,6 @@
 #include <fstream> // pour ifstream
 #include <iomanip> // pour setw
 #include <cstdlib> // pour rand
-#include "Joueurs.h" // Structure joueurs
 
 using namespace std;
 

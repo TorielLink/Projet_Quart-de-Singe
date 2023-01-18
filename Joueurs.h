@@ -5,7 +5,7 @@
 /**
  * @file Joueurs.h
  * SAÉ S1.02 : Le quart de singe
- * @authors PROUX Clothilde, TASSIN Nicolas
+ * @authors PROUX Clothilde
  * @version 1 - 30/12/2022
  * @brief Toutes les fonctions des joueurs.
  * Comparaison d'approches algorithmiques -- BUT Paris - Rives de Seine

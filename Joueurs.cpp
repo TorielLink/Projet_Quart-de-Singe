@@ -1,7 +1,7 @@
 /**
  * @file Joueurs.cpp
  * SAÉ S1.02 : Le quart de singe
- * @authors PROUX Clothilde, TASSIN Nicolas
+ * @authors PROUX Clothilde
  * @version finale - 05/01/2023
  * @brief Jouer une partie de Quart de Singe.
  * Comparaison d'approches algorithmiques -- BUT Paris - Rives de Seine
@@ -61,7 +61,8 @@ bool lettreJoueeHumain(Joueurs &joueursManche, char *lettresJouees, const char c
     bool lettreBonne = true;
 
     if (toupper(coupJoue) >= 65 && toupper(coupJoue) <= 90) { // La lettre est non-accentuée
-        lettresJouees[strlen(lettresJouees)] = (char) toupper(coupJoue);
+        if (strlen(lettresJouees) < MAX_MOT - 1)
+            lettresJouees[strlen(lettresJouees)] = (char) toupper(coupJoue);
         if (strlen(lettresJouees) > 2) { // Mot testé à partir de trois lettres
             if (appartientDico(lettresJouees)) {
                 cout << "le mot " << lettresJouees << " existe, le joueur " << joueursManche.joueurActuel
